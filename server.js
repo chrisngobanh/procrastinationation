@@ -14,7 +14,7 @@ app.listen(appEnv.port);
 console.log('Server running on ', appEnv.url);
 
 app.get('/', function(req, res) {
-  res.redirect('https://www.facebook.com/dialog/oauth?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook');
+  res.redirect('https://www.facebook.com/dialog/oauth?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&scope=public_profile,user_friends,email');
 });
 
 app.post('/facebook', function(req, res) {
