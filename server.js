@@ -1,9 +1,11 @@
 var express = require('express');
+var cfenv = require('cfenv');
 var request = require('request');
 
 var app = express();
+var appEnv = cfenv.getAppEnv();
 
-app.listen(4000);
+app.listen(appEnv.port);
 
 console.log('Server running on port 4000');
 
