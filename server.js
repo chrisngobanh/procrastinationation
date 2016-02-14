@@ -24,7 +24,7 @@ cloudant.db.list(function(err, allDbs) {
 });
 
 var users = cloudant.db.use('users')
-var id = { name: 'facebookId', type:'json', index:{ fields: ['name']}};
+var id = { name: 'facebookId', type:'json', index:{ fields: ['facebookId']}};
 
 users.index(id);
 
