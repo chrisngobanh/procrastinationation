@@ -65,8 +65,8 @@ app.get('/facebook', function(req, res) {
           var facebookId = res3.body.id;
 
           users.find({ selector: { facebookId: facebookId }}, function(err, body) {
-            console.log(err, body);
-            if (!body) {
+            console.log(err, body.docs);
+            if (body.docs === 0) {
               users.insert({facebookId: facebookId, name: name}, function(err, body) {
                 res.send({
                   message: 'You have logged in!',
