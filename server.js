@@ -18,7 +18,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/facebook', function(req, res) {
-  console.log(req.params);
+  console.log(req.query);
     /*request.post('https://www.facebook.com/dialog/oauth?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook', function(err, res) {
       console.log(res.body);
     });*/
