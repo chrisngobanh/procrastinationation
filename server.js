@@ -28,6 +28,18 @@ var id = { name: 'facebookId', type:'json', index:{ fields: ['facebookId']}};
 
 users.index(id);
 
+
+var events = cloudant.db.use('events')
+var website = { name: 'website', type:'json', index:{ fields: ['website']}};
+var timestamp = { name: 'timestamp', type:'json', index:{ fields: ['timestamp']}};
+var duration = { name: 'duration', type:'json', index:{ fields: ['duration']}};
+var userid = { name: 'userid', type:'json', index:{ fields: ['userid']}};
+
+events.index(website);
+events.index(timestamp);
+events.index(duration);
+events.index(userid);
+
 app.get('/facebook', function(req, res) {
   var code = req.query.code;
 
@@ -92,7 +104,7 @@ app.get('/facebook', function(req, res) {
 // TODO: Validation for this
 app.post('/event', function(req, res) {
   var website = req.body.website;
-  var timestamp = req.body.timestamp;
+  var timestamp = parseInt(req.body.timestamp);
   var duration = req.body.duration;
   var user_token = req.body.user_token;
 
@@ -103,12 +115,40 @@ app.post('/event', function(req, res) {
     return;
   }
 
-  if (!validator.isDate(timestamp)) {
+  // If the timestamp is a valid date
+  if (!((new Date(timestamp)).getTime() > 0)) {
     res.send({
       message: 'That is not a valid timestamp.',
     });
     return;
   }
+
+  baseRequest.get('https://graph.facebook.com/me?access_token=' + access_token, function(err, res1) {
+    var facebookId = res1.body.id;
+
+    // How??? Someone is messing with us
+    if (!facebookId) {
+      res.send({
+        message: 'Something went wrong. Try again!',
+      });
+    }
+
+    // Check if the user is in the db
+    users.find({ selector: { facebookId: facebookId }}, function(err, body) {
+      if (body.docs.length !== 0) {
+        // TODO: Evenets.insert
+        events.insert({userid: facebookId, website: website, timestamp: timestamp, duration: duration}, function(err, body) {
+          res.send({
+            message: '',
+          });
+        });
+      } else {
+        res.send({
+          message: 'You do not have a Procrastinationation account.',
+        });
+      }
+    });
+  });
 
   res.send({ website: website, timestamp: timestamp, duration: duration, user_token: user_token })
 });
