@@ -99,11 +99,12 @@ app.get('/facebook', function(req, res) {
 
 // TODO: Validation for this
 app.post('/event', function(req, res) {
-  var website = req.body.website;
+  var website = req.body.url;
   var timestamp = parseInt(req.body.timestamp);
   var duration = req.body.duration;
   var user_token = req.body.user_token;
 
+  console.log(duration);
   if (!validator.isFQDN(website)) {
     res.send({
       message: 'That is not a valid website.',
