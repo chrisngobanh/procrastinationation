@@ -104,7 +104,7 @@ app.post('/event', function(req, res) {
   var duration = req.body.duration;
   var user_token = req.body.user_token;
 
-  if (!validator.isURL(website, { protocols: ['http', 'https'], require_protocol: true})) {
+  if (!validator.isFQDN(website)) {
     res.send({
       message: 'That is not a valid website.',
     });
