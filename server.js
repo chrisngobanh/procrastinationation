@@ -45,7 +45,7 @@ events.index(userid);
 app.get('/facebook', function(req, res) {
   var code = req.query.code;
 
-  baseRequest.post('https://graph.facebook.com/v2.3/oauth/access_token?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&client_secret=9fb99aa844667e815c990b41aa086d27&code=' + code, function(err, res1) {
+  baseRequest.post('https://graph.facebook.com/v2.3/oauth/access_token?client_id=523614004477797&redirect_uri=http://procrastinationation.org/facebook&client_secret=9fb99aa844667e815c990b41aa086d27&code=' + code, function(err, res1) {
     var access_token = res1.body.access_token;
 
     if (!access_token) {
@@ -91,7 +91,7 @@ app.get('/facebook', function(req, res) {
         });
 
       } else {
-        res.redirect('https://www.facebook.com/dialog/oauth?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&auth_type=rerequest&scope=' + userFriends);
+        res.redirect('https://www.facebook.com/dialog/oauth?client_id=523614004477797&redirect_uri=http://procrastinationation.org/facebook&auth_type=rerequest&scope=' + userFriends);
       }
     });
   });
