@@ -17,8 +17,8 @@ app.get('/', function(req, res) {
   res.redirect('https://www.facebook.com/dialog/oauth?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&scope=public_profile,user_friends,email');
 });
 
-app.post('/facebook', function(req, res) {
-  console.log(req.body);
+app.get('/facebook', function(req, res) {
+  console.log(req.params);
     /*request.post('https://www.facebook.com/dialog/oauth?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook', function(err, res) {
       console.log(res.body);
     });*/
