@@ -146,8 +146,9 @@ app.post('/event', function(req, res) {
   });
 });
 
-// Show rankings for today
-app.post('/stats/ranking/1', function(req, res) {
+
+// Show rankings for all time
+app.post('/stats/ranking/3', function(req, res) {
   var user_token = req.body.user_token;
 
   baseRequest.get('https://graph.facebook.com/me?access_token=' + user_token, function(err, res1) {
@@ -160,14 +161,34 @@ app.post('/stats/ranking/1', function(req, res) {
     }
 
     events.find({ selector: { userid: facebookId }}, function(err, body) {
-      var superArr = {};
+      var superObj = {};
       _.forEach(body.docs, function(val) {
-        if (!superArr[val.website]) {
-          superArr[val.website] = val.duration;
+        if (!superObj[val.website]) {
+          superObj[val.website] = val.duration;
         } else {
-          superArr[val.website] += val.duration;
+          superObj[val.website] += val.duration;
         }
       })
+
+      var superArr = [];
+      for (var i = 0; i < 5; i++) {
+        var maxName;
+        var maxNum = 0;
+        _.forEach(superObj, function(val, key) {
+          if (val > maxNum) {
+            maxName = key;
+            maxNum = val;
+          }
+        })
+
+        // Deep copy
+        var obj = {};
+        obj[maxName] = maxNum;
+        superArr.push(obj);
+        delete superObj[maxName];
+      }
+
+      res.send({ data: superArr });
 
     });
   });
