@@ -133,18 +133,18 @@ app.post('/event', function(req, res) {
 
     // Check if the user is in the db
     users.find({ selector: { facebookId: facebookId }}, function(err, body) {
-      if (body.docs.length !== 0) {
+      //if (body.docs.length !== 0) {
 
         events.insert({userid: facebookId, website: website, timestamp: timestamp, duration: duration}, function(err, body) {
           res.send({
             message: '',
           });
         });
-      } else {
+    /*  } else {
         res.send({
           message: 'You do not have a Procrastinationation account.',
         });
-      }
+      }*/
     });
   });
 });
