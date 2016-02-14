@@ -11,16 +11,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.listen(appEnv.port);
 
-console.log('Server running on ', appEnv.url);
-
-app.get('/', function(req, res) {
-  res.redirect('https://www.facebook.com/dialog/oauth?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&scope=public_profile,user_friends,email');
-});
+console.log('Server running on', appEnv.url);
 
 app.get('/facebook', function(req, res) {
   var code = req.query.code;
 
   request.post('https://graph.facebook.com/v2.3/oauth/access_token?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&client_secret=9fb99aa844667e815c990b41aa086d27&code=' + code, function(err, res) {
-    console.log(res.body);
+    var access_token = res.body.access_token;
+      request.post('https://graph.facebook.com/me?access_token=' + access_token, function(err, res) {
+        console.log(res.body);
+      });
   });
 });
