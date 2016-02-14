@@ -47,6 +47,7 @@ app.get('/facebook', function(req, res) {
   baseRequest.post('https://graph.facebook.com/v2.3/oauth/access_token?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&client_secret=9fb99aa844667e815c990b41aa086d27&code=' + code, function(err, res1) {
     var access_token = res1.body.access_token;
 
+    console.log(res1.body)
     if (!access_token) {
       res.send({
         message: 'Something went wrong. Try again.'
@@ -147,6 +148,63 @@ app.post('/event', function(req, res) {
 });
 
 
+function isWithinADay(timestamp) {
+  return (Date.now() - timestamp > 86400000);
+}
+
+
+// Rankings within the day
+app.post('/stats/ranking/1', function(req, res) {
+  var user_token = req.body.user_token;
+
+  baseRequest.get('https://graph.facebook.com/me?access_token=' + user_token, function(err, res1) {
+    var facebookId = res1.body.id;
+    if (!facebookId) {
+      res.send({
+        message: 'Something went wrong. Try again!',
+      });
+      return;
+    }
+
+    events.find({ selector: { userid: facebookId }}, function(err, body) {
+      var superObj = {};
+      _.forEach(body.docs, function(val) {
+        if (isWithinADay(val.timestamp)) {
+          if (!superObj[val.website]) {
+            superObj[val.website] = val.duration;
+          } else {
+            superObj[val.website] += val.duration;
+          }
+        }
+      })
+
+
+
+      var superArr = [];
+      for (var i = 0; i < 5; i++) {
+        if (_.size(superObj) <= 0) break;
+        var maxName;
+        var maxNum = 0;
+        _.forEach(superObj, function(val, key) {
+          if (val > maxNum) {
+            maxName = key;
+            maxNum = val;
+          }
+        })
+
+        var obj = {};
+        obj[maxName] = maxNum;
+        superArr.push(obj);
+        delete superObj[maxName];
+      }
+
+      res.send({ data: superArr });
+
+    });
+  });
+
+});
+
 // Show rankings for all time
 app.post('/stats/ranking/3', function(req, res) {
   var user_token = req.body.user_token;
@@ -172,6 +230,7 @@ app.post('/stats/ranking/3', function(req, res) {
 
       var superArr = [];
       for (var i = 0; i < 5; i++) {
+        if (_.size(superObj) <= 0) break;
         var maxName;
         var maxNum = 0;
         _.forEach(superObj, function(val, key) {
@@ -181,7 +240,6 @@ app.post('/stats/ranking/3', function(req, res) {
           }
         })
 
-        // Deep copy
         var obj = {};
         obj[maxName] = maxNum;
         superArr.push(obj);
