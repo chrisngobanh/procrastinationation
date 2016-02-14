@@ -256,8 +256,7 @@ app.post('/stats/ranking/3', function(req, res) {
 
 // In the last 24 hours
 app.post('/feed', function(req, res) {
-  var user_token = req.body.user_token;
-
+ /* var user_token = req.body.user_token;
   baseRequest.get('https://graph.facebook.com/me?access_token=' + user_token, function(err, res1) {
     var facebookId = res1.body.id;
     if (!facebookId) {
@@ -267,46 +266,53 @@ app.post('/feed', function(req, res) {
       return;
     }
 
+    // load friends
     baseRequest.get('https://graph.facebook.com/me/friends?access_token=' + user_token, function(err, res2) {
-      var friends = res2.body.data;
-      var max = (friends.length > 10 ? friends.length : 10);
 
-      var newFriends = _.shuffle(friends);
-      var superArr = [];
-      for (var i = 0; i < max; i++) {
-        if (!newFriends[i]) break;
-        //console.log(newFriends[i], newFriends[i].id);
-        events.find({ selector: { userid: newFriends[i].id }}, function(err, body) {
+      var friends = res2.body.data;
+      var masterArray = [];
+      for (var i = 0; i < friends.length; i++) {
+
+        events.find({ selector: { userid: friends[i].id }}, function(err, body) {
           var superObj = {};
-          _.forEach(body.docs, function(val) {
+          for (var j = 0; j < body.docs.length; j++) {
+            var val = body.docs[j];
             if (isWithinADay(val.timestamp)) {
               if (!superObj[val.website]) {
-                superObj[val.website] = val.duration;
+                superObj[val.website] = parseInt(val.duration);
               } else {
-                superObj[val.website] += val.duration;
+                superObj[val.website] += parseInt(val.duration);
               }
             }
-          });
+          }
 
           var maxName;
           var maxNum = 0;
-          _.forEach(superObj, function(val, key) {
-            if (val > maxNum) {
+          _.forEach(superObj, function(value, key) {
+            if (value > maxNum) {
+              maxNum = value;
               maxName = key;
-              maxNum = val;
             }
           })
 
           var obj = {};
           obj[maxName] = maxNum;
-          superArr.push(obj);
-          console.log(superArr);
+
+          var obj2 = {};
+          obj2[body.docs[0].userid] = obj;
+          masterArray.push(obj2)
+
+          if (masterArray.length === friends.length) {
+            res.send({
+              feed: masterArray
+            })
+          }
+
         });
       }
-
-      console.log(superArr);
     });
-
-
-  });
+  });*/
 })
+
+
+
