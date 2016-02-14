@@ -30,7 +30,8 @@ app.get('/facebook', function(req, res) {
 
   baseRequest.post('https://graph.facebook.com/v2.3/oauth/access_token?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&client_secret=9fb99aa844667e815c990b41aa086d27&code=' + code, function(err, res1) {
     var access_token = res1.body.access_token;
-    console.log(access_token);
+
+    // name id
     // Validate the token and its permissions
     baseRequest.get('https://graph.facebook.com/me/permissions?access_token=' + access_token, function(err, res2) {
       var permissions = res2.body.data;
@@ -49,9 +50,16 @@ app.get('/facebook', function(req, res) {
       }
 
       if (isGood) {
-        res.send({
-          'access_token': access_token
+        baseRequest.get('https://graph.facebook.com/me?access_token=' + access_token, function(err, res3) {
+          var name = res3.body.name;
+          var facebookId = res3.body.id;
+          users.insert({facebookId: facebookId, name: name}, function(err, body) {
+            res.send({
+              'access_token': access_token
+            });
+          });
         });
+
       } else {
         res.redirect('https://www.facebook.com/dialog/oauth?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&auth_type=rerequest&scope=' + userFriends);
       }
