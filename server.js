@@ -26,9 +26,7 @@ cloudant.db.list(function(err, allDbs) {
 var users = cloudant.db.use('users')
 var id = { name: 'facebookId', type:'json', index:{ fields: ['name']}};
 
-users.index(id, function(err, result) {
-  console.log(err, result);
-});
+users.index(id);
 
 app.get('/facebook', function(req, res) {
   var code = req.query.code;
@@ -67,8 +65,7 @@ app.get('/facebook', function(req, res) {
           var facebookId = res3.body.id;
 
           users.find({ selector: { facebookId: facebookId }}, function(err, body) {
-            console.log(err);
-            console.log(body);
+            console.log(err, body);
             if (!body) {
               users.insert({facebookId: facebookId, name: name}, function(err, body) {
                 res.send({
