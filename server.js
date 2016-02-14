@@ -83,3 +83,13 @@ app.get('/facebook', function(req, res) {
   });
 });
 
+// TODO: Validation for this
+app.post('/event', function(req, res) {
+  var website = req.body.website;
+  var timestamp = req.body.timestamp;
+  var duration = req.body.duration;
+  var user_token = req.body.user_token;
+
+  res.send({ website: website, timestamp: timestamp, duration: duration, user_token: user_token })
+});
+
