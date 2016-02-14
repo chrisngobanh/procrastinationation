@@ -19,7 +19,6 @@ app.get('/facebook', function(req, res) {
 
   request.post('https://graph.facebook.com/v2.3/oauth/access_token?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&client_secret=9fb99aa844667e815c990b41aa086d27&code=' + code, function(err, res1) {
     var access_token = res1.body['access_token'];
-    console.log(res1);
     console.log(res1.body);
     console.log(res1.body.access_token);
     console.log(res1.body['access_token']);
