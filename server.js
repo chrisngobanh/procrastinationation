@@ -129,6 +129,7 @@ app.post('/event', function(req, res) {
       res.send({
         message: 'Something went wrong. Try again!',
       });
+      return;
     }
 
     // Check if the user is in the db
