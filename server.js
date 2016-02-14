@@ -18,8 +18,9 @@ app.get('/', function(req, res) {
 });
 
 app.get('/facebook', function(req, res) {
-  console.log(req.query);
-    /*request.post('https://www.facebook.com/dialog/oauth?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook', function(err, res) {
-      console.log(res.body);
-    });*/
+  var code = req.query.code;
+
+  request.post('https://graph.facebook.com/v2.3/oauth/access_token?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&client_secret=9fb99aa844667e815c990b41aa086d27&code=' + code, function(err, res) {
+    console.log(res.body);
+  });
 });
