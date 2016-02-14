@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var async = require('async');
 var bodyParser = require('body-parser');
 var cfenv = require('cfenv');
 var Cloudant = require('cloudant');
@@ -47,7 +48,6 @@ app.get('/facebook', function(req, res) {
   baseRequest.post('https://graph.facebook.com/v2.3/oauth/access_token?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&client_secret=9fb99aa844667e815c990b41aa086d27&code=' + code, function(err, res1) {
     var access_token = res1.body.access_token;
 
-    console.log(res1.body)
     if (!access_token) {
       res.send({
         message: 'Something went wrong. Try again.'
@@ -104,8 +104,8 @@ app.post('/event', function(req, res) {
   var duration = req.body.duration;
   var user_token = req.body.user_token;
 
-  console.log(duration);
   if (!validator.isFQDN(website)) {
+    console.log(website);
     res.send({
       message: 'That is not a valid website.',
     });
@@ -114,6 +114,7 @@ app.post('/event', function(req, res) {
 
   // If the timestamp is a valid date
   if (!((new Date(timestamp)).getTime() > 0)) {
+    console.log(timestamp);
     res.send({
       message: 'That is not a valid timestamp.',
     });
@@ -133,7 +134,7 @@ app.post('/event', function(req, res) {
     // Check if the user is in the db
     users.find({ selector: { facebookId: facebookId }}, function(err, body) {
       if (body.docs.length !== 0) {
-        // TODO: Evenets.insert
+
         events.insert({userid: facebookId, website: website, timestamp: timestamp, duration: duration}, function(err, body) {
           res.send({
             message: '',
@@ -150,7 +151,7 @@ app.post('/event', function(req, res) {
 
 
 function isWithinADay(timestamp) {
-  return (Date.now() - timestamp > 86400000);
+  return (Date.now() - timestamp < 86400000);
 }
 
 
@@ -162,7 +163,7 @@ app.post('/stats/ranking/1', function(req, res) {
     var facebookId = res1.body.id;
     if (!facebookId) {
       res.send({
-        message: 'Something went wrong. Try again!',
+        message: 'Something went wrong. Try again.',
       });
       return;
     }
@@ -214,7 +215,7 @@ app.post('/stats/ranking/3', function(req, res) {
     var facebookId = res1.body.id;
     if (!facebookId) {
       res.send({
-        message: 'Something went wrong. Try again!',
+        message: 'Something went wrong. Try again.',
       });
       return;
     }
@@ -251,6 +252,61 @@ app.post('/stats/ranking/3', function(req, res) {
 
     });
   });
-
 });
 
+// In the last 24 hours
+app.post('/feed', function(req, res) {
+  var user_token = req.body.user_token;
+
+  baseRequest.get('https://graph.facebook.com/me?access_token=' + user_token, function(err, res1) {
+    var facebookId = res1.body.id;
+    if (!facebookId) {
+      res.send({
+        message: 'Something went wrong. Try again.',
+      });
+      return;
+    }
+
+    baseRequest.get('https://graph.facebook.com/me/friends?access_token=' + user_token, function(err, res2) {
+      var friends = res2.body.data;
+      var max = (friends.length > 10 ? friends.length : 10);
+
+      var newFriends = _.shuffle(friends);
+      var superArr = [];
+      for (var i = 0; i < max; i++) {
+        if (!newFriends[i]) break;
+        //console.log(newFriends[i], newFriends[i].id);
+        events.find({ selector: { userid: newFriends[i].id }}, function(err, body) {
+          var superObj = {};
+          _.forEach(body.docs, function(val) {
+            if (isWithinADay(val.timestamp)) {
+              if (!superObj[val.website]) {
+                superObj[val.website] = val.duration;
+              } else {
+                superObj[val.website] += val.duration;
+              }
+            }
+          });
+
+          var maxName;
+          var maxNum = 0;
+          _.forEach(superObj, function(val, key) {
+            if (val > maxNum) {
+              maxName = key;
+              maxNum = val;
+            }
+          })
+
+          var obj = {};
+          obj[maxName] = maxNum;
+          superArr.push(obj);
+          console.log(superArr);
+        });
+      }
+
+      console.log(superArr);
+    });
+
+
+  });
+})
