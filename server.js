@@ -27,7 +27,6 @@ var users = cloudant.db.use('users')
 app.get('/facebook', function(req, res) {
   var code = req.query.code;
 
-
   baseRequest.post('https://graph.facebook.com/v2.3/oauth/access_token?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&client_secret=9fb99aa844667e815c990b41aa086d27&code=' + code, function(err, res1) {
     var access_token = res1.body.access_token;
 
@@ -53,10 +52,22 @@ app.get('/facebook', function(req, res) {
         baseRequest.get('https://graph.facebook.com/me?access_token=' + access_token, function(err, res3) {
           var name = res3.body.name;
           var facebookId = res3.body.id;
-          users.insert({facebookId: facebookId, name: name}, function(err, body) {
-            res.send({
-              'access_token': access_token
-            });
+
+          users.find({ selector: { facebookId: facebookId }}, function(err, body) {
+            if (!body) {
+              users.insert({facebookId: facebookId, name: name}, function(err, body) {
+                res.send({
+                  message: 'You have logged in!',
+                  access_token: access_token
+                });
+              });
+
+            } else {
+              res.send({
+                message: 'You have logged in!',
+                access_token: access_token
+              });
+            }
           });
         });
 
