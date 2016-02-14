@@ -24,6 +24,7 @@ app.get('/facebook', function(req, res) {
       request.get('https://graph.facebook.com/me/permissions?access_token=' + access_token, function(err, res2) {
         var permissions = res2.body.data;
 
+        console.log(res2.body);
         var isGood = false;
 
         var userFriends = 'user_friends';
