@@ -54,6 +54,7 @@ app.get('/facebook', function(req, res) {
           var facebookId = res3.body.id;
 
           users.find({ selector: { facebookId: facebookId }}, function(err, body) {
+            console.log(body);
             if (!body) {
               users.insert({facebookId: facebookId, name: name}, function(err, body) {
                 res.send({
