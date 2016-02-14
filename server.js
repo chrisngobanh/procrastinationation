@@ -80,11 +80,11 @@ app.get('/facebook', function(req, res) {
           users.find({ selector: { facebookId: facebookId }}, function(err, body) {
             if (body.docs.length === 0) {
               users.insert({facebookId: facebookId, name: name}, function(err, body) {
-                res.redirect('www.facebook.com/connect/login_success.html?access_token=' + access_token);
+                res.redirect('https://www.facebook.com/connect/login_success.html?access_token=' + access_token);
               });
 
             } else {
-              res.redirect('www.facebook.com/connect/login_success.html?access_token=' + access_token)
+              res.redirect('https://www.facebook.com/connect/login_success.html?access_token=' + access_token)
             }
           });
         });
