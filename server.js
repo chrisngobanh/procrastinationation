@@ -3,6 +3,7 @@ var cfenv = require('cfenv');
 var Cloudant = require('cloudant');
 var express = require('express');
 var request = require('request');
+var validator = require('validator');
 
 var app = express();
 var appEnv = cfenv.getAppEnv();
@@ -23,15 +24,24 @@ cloudant.db.list(function(err, allDbs) {
 });
 
 var users = cloudant.db.use('users')
-var id = { name: 'facebookId', type:'json', index:{ fields: ['facebookId']}}
+var id = { name: 'facebookId', type:'json', index:{ fields: ['name']}};
 
-users.index(id);
+users.index(id, function(err, result) {
+  console.log(err, result);
+});
 
 app.get('/facebook', function(req, res) {
   var code = req.query.code;
 
   baseRequest.post('https://graph.facebook.com/v2.3/oauth/access_token?client_id=523614004477797&redirect_uri=http://procrastinationation.mybluemix.net/facebook&client_secret=9fb99aa844667e815c990b41aa086d27&code=' + code, function(err, res1) {
     var access_token = res1.body.access_token;
+
+    if (!access_token) {
+      res.send({
+        message: 'Something went wrong. Try again.'
+      });
+      return;
+    }
 
     // name id
     // Validate the token and its permissions
@@ -89,6 +99,20 @@ app.post('/event', function(req, res) {
   var timestamp = req.body.timestamp;
   var duration = req.body.duration;
   var user_token = req.body.user_token;
+
+  if (!validator.isURL(website, { protocols: ['http', 'https'], require_protocol: true})) {
+    res.send({
+      message: 'That is not a valid website.',
+    });
+    return;
+  }
+
+  if (!validator.isDate(timestamp)) {
+    res.send({
+      message: 'That is not a valid timestamp.',
+    });
+    return;
+  }
 
   res.send({ website: website, timestamp: timestamp, duration: duration, user_token: user_token })
 });
