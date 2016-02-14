@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var bodyParser = require('body-parser');
 var cfenv = require('cfenv');
 var Cloudant = require('cloudant');
@@ -79,17 +80,11 @@ app.get('/facebook', function(req, res) {
           users.find({ selector: { facebookId: facebookId }}, function(err, body) {
             if (body.docs.length === 0) {
               users.insert({facebookId: facebookId, name: name}, function(err, body) {
-                res.send({
-                  message: 'You have logged in!',
-                  access_token: access_token
-                });
+                res.redirect('www.facebook.com/connect/login_success.html?access_token=' + access_token);
               });
 
             } else {
-              res.send({
-                message: 'You have logged in!',
-                access_token: access_token
-              });
+              res.redirect('www.facebook.com/connect/login_success.html?access_token=' + access_token)
             }
           });
         });
@@ -123,7 +118,7 @@ app.post('/event', function(req, res) {
     return;
   }
 
-  baseRequest.get('https://graph.facebook.com/me?access_token=' + access_token, function(err, res1) {
+  baseRequest.get('https://graph.facebook.com/me?access_token=' + user_token, function(err, res1) {
     var facebookId = res1.body.id;
 
     // How??? Someone is messing with us
@@ -149,7 +144,33 @@ app.post('/event', function(req, res) {
       }
     });
   });
+});
 
-  res.send({ website: website, timestamp: timestamp, duration: duration, user_token: user_token })
+// Show rankings for today
+app.post('/stats/ranking/1', function(req, res) {
+  var user_token = req.body.user_token;
+
+  baseRequest.get('https://graph.facebook.com/me?access_token=' + user_token, function(err, res1) {
+    var facebookId = res1.body.id;
+    if (!facebookId) {
+      res.send({
+        message: 'Something went wrong. Try again!',
+      });
+      return;
+    }
+
+    events.find({ selector: { userid: facebookId }}, function(err, body) {
+      var superArr = {};
+      _.forEach(body.docs, function(val) {
+        if (!superArr[val.website]) {
+          superArr[val.website] = val.duration;
+        } else {
+          superArr[val.website] += val.duration;
+        }
+      })
+
+    });
+  });
+
 });
 
